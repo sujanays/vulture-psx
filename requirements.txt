@@ -7,6 +7,6 @@ celery==5.4.0
 redis==5.0.1
 pydantic==2.7.1
 slowapi==0.1.8
-# Optional for PDF generation (future)
+# PDF generation
 weasyprint==62.3
-# Frontend (Node) dependencies will be handled by Vite/npm
+pydyf==0.10.0

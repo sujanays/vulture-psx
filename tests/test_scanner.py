@@ -71,5 +71,20 @@ class TestVulTureScanner(unittest.TestCase):
         self.assertTrue(any("wordpress" in t.lower() for t in techs))
         self.assertTrue(any("Information Disclosure" in f for f in findings))
 
+    def test_url_normalization(self):
+        from backend.api.schemas import ScanRequest
+        req1 = ScanRequest(url="amazon.com")
+        self.assertEqual(req1.url, "https://www.amazon.com")
+
+        req2 = ScanRequest(url="abc.com")
+        self.assertEqual(req2.url, "https://www.abc.com")
+
+        req3 = ScanRequest(url="https://amazon.com")
+        self.assertEqual(req3.url, "https://www.amazon.com")
+
+        req4 = ScanRequest(url="https://sub.domain.com/path")
+        self.assertEqual(req4.url, "https://sub.domain.com/path")
+
 if __name__ == "__main__":
     unittest.main()
+

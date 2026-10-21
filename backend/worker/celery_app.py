@@ -1,7 +1,6 @@
 import os
 from celery import Celery
 
-# Read the environment variable supplied by Render
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 celery_app = Celery(
@@ -12,6 +11,7 @@ celery_app = Celery(
 )
 
 celery_app.conf.update(
+    imports=("scanner.tasks",),  # Registers scanner.tasks.perform_scan
     task_serializer="json",
     accept_content=["json"],
     result_serializer="json",

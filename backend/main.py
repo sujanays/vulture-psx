@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
 from .api.routes import router as api_router
 from .db.database import init_db
 
@@ -16,6 +17,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 def startup_event():
     init_db()
 
+# Root endpoint to prevent 404 on base URL
+@app.get("/")
+def read_root():
+    return {"status": "online", "docs": "/docs"}
+
 # CORS – allow all origins for development
 app.add_middleware(
     CORSMiddleware,
@@ -25,4 +31,5 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-app.include_router(api_router, prefix='/api')
+# Mount router without duplicate prefix
+app.include_router(api_router)

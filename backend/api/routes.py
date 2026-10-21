@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException, Request, Response
-from pydantic import BaseModel, HttpUrl
 from uuid import uuid4
 from typing import Dict, List, Optional
+from fastapi import APIRouter, HTTPException, Request, Response
+from pydantic import BaseModel, field_validator
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+# Absolute import matching VulTure/backend/worker/celery_app.py
+from backend.worker.celery_app import celery_app
+
 from ..db.database import (
     create_scan,
     update_scan_status,
@@ -16,7 +20,6 @@ from ..services.pdf_generator import generate_pdf_report
 limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
 
-from pydantic import BaseModel, field_validator
 
 class ScanRequest(BaseModel):
     url: str
@@ -54,16 +57,8 @@ class ScanStatusResponse(BaseModel):
     result: Optional[dict] = None
     error: Optional[str] = None
 
-from backend.celery_app import celery_app
 
-@router.post("/api/scan")
-async def trigger_scan(payload: ScanRequest):
-    task = celery_app.send_task(
-        "scanner.tasks.perform_scan",
-        args=[payload.url]
-    )
-    return {"task_id": task.id, "status": "QUEUED"}
-@router.post('/scan/', response_model=ScanStatusResponse)
+@router.post("/api/scan", response_model=ScanStatusResponse)
 @limiter.limit("10/minute")
 async def trigger_scan(request: Request, body: ScanRequest):
     task_id = str(uuid4())
@@ -81,7 +76,8 @@ async def trigger_scan(request: Request, body: ScanRequest):
     
     return ScanStatusResponse(task_id=task_id, status='PENDING')
 
-@router.get('/scan/{task_id}/status', response_model=ScanStatusResponse)
+
+@router.get('/api/scan/{task_id}/status', response_model=ScanStatusResponse)
 async def get_scan_status(task_id: str):
     # Check DB first
     scan_row = get_scan(task_id)
@@ -116,26 +112,30 @@ async def get_scan_status(task_id: str):
     else:
         return ScanStatusResponse(task_id=task_id, status=state)
 
-@router.get('/scan/{task_id}')
+
+@router.get('/api/scan/{task_id}')
 async def get_scan_details(task_id: str):
     scan = get_scan(task_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan record not found.")
     return scan
 
-@router.get('/scan/{task_id}/pdf')
+
+@router.get('/api/scan/{task_id}/pdf')
 async def download_scan_pdf(task_id: str):
     scan = get_scan(task_id)
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found.")
     
     if scan.get("status") != "SUCCESS" or not scan.get("result"):
-        # If DB doesn't have it yet, check Celery
         async_result = celery_app.AsyncResult(task_id)
         if async_result.state == "SUCCESS":
             scan["result"] = async_result.result
         else:
-            raise HTTPException(status_code=400, detail="Scan is still in progress or failed. Cannot generate PDF.")
+            raise HTTPException(
+                status_code=400, 
+                detail="Scan is still in progress or failed. Cannot generate PDF."
+            )
 
     try:
         pdf_bytes = generate_pdf_report(scan)
@@ -150,12 +150,14 @@ async def download_scan_pdf(task_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
 
-@router.get('/scans/', response_model=List[Dict])
+
+@router.get('/api/scans', response_model=List[Dict])
 async def list_recent_scans():
     """Return a list of recent scan records from persistent database storage."""
     return list_scans(limit=50)
 
-@router.delete('/scan/{task_id}')
+
+@router.delete('/api/scan/{task_id}')
 async def delete_scan_record(task_id: str):
     success = delete_scan(task_id)
     if not success:

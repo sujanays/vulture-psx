@@ -4,8 +4,6 @@ from uuid import uuid4
 from typing import Dict, List, Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-
-from ..worker.celery_app import celery_app
 from ..db.database import (
     create_scan,
     update_scan_status,

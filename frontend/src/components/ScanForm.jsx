@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import WarningBanner from './WarningBanner';
 
 const SAMPLE_TARGETS = [
   'https://www.amazon.com',
@@ -85,6 +86,7 @@ export default function ScanForm({ onTaskStarted, isLoading }) {
 
   return (
     <div className="scan-form-container">
+      <WarningBanner />
       <form onSubmit={handleSubmit} className="scan-form">
         <div className="input-group">
           <span className="input-prefix">TARGET</span>

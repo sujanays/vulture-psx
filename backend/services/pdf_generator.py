@@ -5,14 +5,17 @@ Uses WeasyPrint to transform scan results into an executive PDF audit report.
 
 from typing import Dict, Any
 from datetime import datetime
+import html
 import weasyprint
 
 def generate_pdf_report(scan_data: Dict[str, Any]) -> bytes:
     result = scan_data.get("result") or {}
-    url = scan_data.get("url", result.get("url", "N/A"))
-    score = result.get("score", scan_data.get("score", 0))
-    grade = result.get("grade", scan_data.get("grade", "F"))
-    timestamp = scan_data.get("created_at") or datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    
+    # Sanitize top-level metadata
+    url = html.escape(str(scan_data.get("url", result.get("url", "N/A"))))
+    score = html.escape(str(result.get("score", scan_data.get("score", 0))))
+    grade = html.escape(str(result.get("grade", scan_data.get("grade", "F"))))
+    timestamp = html.escape(str(scan_data.get("created_at") or datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")))
     
     details = result.get("details", {})
     headers_data = details.get("headers", {}).get("items", [])
@@ -29,33 +32,61 @@ def generate_pdf_report(scan_data: Dict[str, Any]) -> bytes:
     }
     badge_color = grade_colors.get(grade, "#ef4444")
 
-    # Build Header rows
+    # Build Header rows safely with html.escape
     header_rows = ""
     for h in headers_data:
+        title = html.escape(str(h.get("title", "")))
+        header_name = html.escape(str(h.get("header", "")))
+        severity = html.escape(str(h.get("severity", "")))
+        severity_class = html.escape(str(h.get("severity", "")).lower())
+        description = html.escape(str(h.get("description", "")))
+        
         status_badge = '<span class="badge badge-pass">PASSED</span>' if h.get("present") else '<span class="badge badge-fail">MISSING</span>'
+        
         header_rows += f"""
         <tr>
-            <td><strong>{h.get('title')}</strong><br><small style="color: #64748b;">{h.get('header')}</small></td>
+            <td><strong>{title}</strong><br><small style="color: #64748b;">{header_name}</small></td>
             <td>{status_badge}</td>
-            <td><span class="severity severity-{h.get('severity', '').lower()}">{h.get('severity')}</span></td>
-            <td>{h.get('description', '')}</td>
+            <td><span class="severity severity-{severity_class}">{severity}</span></td>
+            <td>{description}</td>
         </tr>
         """
 
-    # Build Remediation items
+    # Build Remediation items safely
     remediation_items = ""
     for r in remediations:
+        category = html.escape(str(r.get("category", "")))
+        rem_title = html.escape(str(r.get("title", "")))
+        rem_severity = html.escape(str(r.get("severity", "")))
+        rem_severity_class = html.escape(str(r.get("severity", "")).lower())
+        advice = html.escape(str(r.get("advice", "")))
+        
         remediation_items += f"""
         <div class="remediation-card">
-            <h4>[{r.get('category')}] {r.get('title')} <span class="severity severity-{r.get('severity', '').lower()}">{r.get('severity')}</span></h4>
-            <p>{r.get('advice')}</p>
+            <h4>[{category}] {rem_title} <span class="severity severity-{rem_severity_class}">{rem_severity}</span></h4>
+            <p>{advice}</p>
         </div>
         """
     if not remediation_items:
         remediation_items = "<p>No critical remediation items detected. Good job!</p>"
 
-    # Build Tech Stack tags
-    tech_tags = "".join(f'<span class="tech-tag">{t.get("name")} ({t.get("category")})</span>' for t in tech_data) or "<span>No signatures identified.</span>"
+    # Build Tech Stack tags safely
+    tech_tags_list = []
+    for t in tech_data:
+        t_name = html.escape(str(t.get("name", "")))
+        t_cat = html.escape(str(t.get("category", "")))
+        tech_tags_list.append(f'<span class="tech-tag">{t_name} ({t_cat})</span>')
+    
+    tech_tags = "".join(tech_tags_list) or "<span>No signatures identified.</span>"
+
+    # SSL variables sanitized
+    ssl_valid = "Yes" if ssl_data.get("valid") else "No (Risk: Insecure Transport)"
+    ssl_issuer = html.escape(str(ssl_data.get("issuer", "N/A")))
+    ssl_exp = html.escape(str(ssl_data.get("expiration_date", "N/A")))
+    ssl_days = html.escape(str(ssl_data.get("days_left", 0)))
+    ssl_proto = html.escape(str(ssl_data.get("protocol", "N/A")))
+    ssl_cipher = html.escape(str(ssl_data.get("cipher_name", "N/A")))
+    ssl_strength = html.escape(str(ssl_data.get("cipher_strength", "N/A")))
 
     html_content = f"""
     <!DOCTYPE html>
@@ -133,12 +164,16 @@ def generate_pdf_report(scan_data: Dict[str, Any]) -> bytes:
                 border-bottom: 1px solid #cbd5e1;
                 padding-bottom: 4px;
                 margin-top: 24px;
+                page-break-after: avoid;
             }}
             table {{
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 8px;
                 font-size: 9pt;
+            }}
+            tr {{
+                page-break-inside: avoid;
             }}
             th, td {{
                 border: 1px solid #e2e8f0;
@@ -177,6 +212,7 @@ def generate_pdf_report(scan_data: Dict[str, Any]) -> bytes:
                 padding: 10px 14px;
                 margin-bottom: 10px;
                 border-radius: 0 6px 6px 0;
+                page-break-inside: avoid;
             }}
             .remediation-card h4 {{
                 margin: 0 0 4px 0;
@@ -226,19 +262,19 @@ def generate_pdf_report(scan_data: Dict[str, Any]) -> bytes:
         <table>
             <tr>
                 <th style="width: 25%;">Valid Certificate</th>
-                <td>{'Yes' if ssl_data.get('valid') else 'No (Risk: Insecure Transport)'}</td>
+                <td>{ssl_valid}</td>
             </tr>
             <tr>
                 <th>Certificate Issuer</th>
-                <td>{ssl_data.get('issuer', 'N/A')}</td>
+                <td>{ssl_issuer}</td>
             </tr>
             <tr>
                 <th>Expiration Date</th>
-                <td>{ssl_data.get('expiration_date', 'N/A')} ({ssl_data.get('days_left', 0)} days remaining)</td>
+                <td>{ssl_exp} ({ssl_days} days remaining)</td>
             </tr>
             <tr>
                 <th>Protocol & Cipher</th>
-                <td>{ssl_data.get('protocol', 'N/A')} &mdash; {ssl_data.get('cipher_name', 'N/A')} ({ssl_data.get('cipher_strength', 'N/A')} suite)</td>
+                <td>{ssl_proto} &mdash; {ssl_cipher} ({ssl_strength} suite)</td>
             </tr>
         </table>
 

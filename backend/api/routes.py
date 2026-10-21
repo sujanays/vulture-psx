@@ -56,6 +56,15 @@ class ScanStatusResponse(BaseModel):
     result: Optional[dict] = None
     error: Optional[str] = None
 
+from backend.celery_app import celery_app
+
+@router.post("/api/scan")
+async def trigger_scan(payload: ScanRequest):
+    task = celery_app.send_task(
+        "scanner.tasks.perform_scan",
+        args=[payload.url]
+    )
+    return {"task_id": task.id, "status": "QUEUED"}
 @router.post('/scan/', response_model=ScanStatusResponse)
 @limiter.limit("10/minute")
 async def trigger_scan(request: Request, body: ScanRequest):

@@ -3,9 +3,6 @@ import axios from 'axios';
 import WarningBanner from './WarningBanner';
 
 const SAMPLE_TARGETS = [
-  'https://www.amazon.com',
-  'https://wordpress.org',
-  'https://github.com',
   'https://example.com'
 ];
 

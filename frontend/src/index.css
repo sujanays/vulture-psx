@@ -1,5 +1,14 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -7,12 +16,27 @@ body {
   padding: 0;
   background-color: #090d16;
   color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Fluid media defaults */
+img, video, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure inputs inherit font */
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
 }

@@ -1015,3 +1015,332 @@ body {
   color: #475569;
   margin-top: 4px;
 }
+
+/* ============================================
+   RESPONSIVE DESIGN — Mobile-First Breakpoints
+   ============================================ */
+
+/* ---------- Tablet & small desktop (≤ 1024px) ---------- */
+@media (max-width: 1024px) {
+  .vulture-app {
+    padding: 0 16px;
+  }
+
+  /* Header stacks vertically */
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 0 16px;
+  }
+  .header-nav {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Report hero stacks */
+  .report-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 22px;
+  }
+  .hero-center {
+    min-width: unset;
+  }
+  .hero-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* 2-column grid → single column */
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  /* History drawer full width */
+  .drawer-content {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* ---------- Small tablet / large phone (≤ 768px) ---------- */
+@media (max-width: 768px) {
+  .vulture-app {
+    padding: 0 12px;
+  }
+  .main-content {
+    padding: 24px 0;
+  }
+
+  /* Scan form input stacks */
+  .input-group {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+  }
+  .input-prefix {
+    margin-right: 0;
+    padding: 6px 12px;
+    justify-content: center;
+  }
+  .scan-input {
+    font-size: 15px;
+    padding: 10px 8px;
+  }
+  .scan-btn {
+    width: 100%;
+    text-align: center;
+    padding: 14px;
+  }
+
+  /* Compliance warning banner stacks for readability */
+  .compliance-warning-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  /* Score gauge shrinks */
+  .gauge-container {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+  }
+  .gauge-grade {
+    font-size: 38px;
+  }
+  .gauge-score {
+    font-size: 14px;
+  }
+
+  /* Stats pills wrap */
+  .stats-pills {
+    justify-content: center;
+  }
+  .report-target-title {
+    font-size: 20px;
+    text-align: center;
+  }
+  .target-url-badge {
+    font-size: 12px;
+    word-break: break-all;
+  }
+
+  /* Tabs scroll horizontally */
+  .report-tabs {
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .report-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  /* Tables → card layout on small screens */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .vul-table {
+    min-width: 600px;
+  }
+
+  /* Scan progress box */
+  .scan-progress-box {
+    padding: 20px;
+  }
+  .progress-title {
+    font-size: 16px;
+  }
+
+  /* Remediation items */
+  .remediation-item {
+    padding: 14px 16px;
+  }
+  .rem-header {
+    flex-wrap: wrap;
+  }
+  .rem-title {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  /* Card padding */
+  .card {
+    padding: 18px;
+  }
+  .card h3 {
+    font-size: 16px;
+  }
+
+  /* Info list items stack on small screens */
+  .info-list li {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .info-val {
+    word-break: break-all;
+  }
+}
+
+/* ---------- Mobile (≤ 480px) ---------- */
+@media (max-width: 480px) {
+  .vulture-app {
+    padding: 0 8px;
+  }
+
+  /* Brand shrinks */
+  .brand-title {
+    font-size: 20px;
+  }
+  .brand-subtitle {
+    font-size: 11px;
+  }
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  .header-brand {
+    gap: 10px;
+  }
+
+  /* Report hero compact */
+  .report-hero {
+    padding: 16px;
+    gap: 16px;
+  }
+  .gauge-container {
+    width: 110px;
+    height: 110px;
+  }
+  .gauge-grade {
+    font-size: 30px;
+  }
+  .gauge-score {
+    font-size: 12px;
+  }
+
+  /* Stat pills stack */
+  .stats-pills {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .stat-pill {
+    justify-content: center;
+  }
+
+  /* Hero action buttons stack full width */
+  .hero-actions {
+    flex-direction: column;
+  }
+  .action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Table → stacked cards on mobile */
+  .vul-table {
+    min-width: unset;
+  }
+  .vul-table,
+  .vul-table thead,
+  .vul-table tbody,
+  .vul-table tr,
+  .vul-table th,
+  .vul-table td {
+    display: block;
+    width: 100%;
+  }
+  .vul-table thead {
+    display: none;
+  }
+  .vul-table tr {
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    background: var(--bg-card);
+  }
+  .vul-table td {
+    padding: 6px 0;
+    border-bottom: none;
+    text-align: left;
+  }
+  .vul-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  /* Tech tags compact */
+  .tech-tags-grid {
+    gap: 8px;
+  }
+  .tech-card {
+    padding: 8px 12px;
+  }
+
+  /* History drawer */
+  .drawer-content {
+    padding: 16px;
+  }
+  .history-item {
+    padding: 8px 10px;
+  }
+  .history-url {
+    font-size: 12px;
+  }
+
+  /* Footer */
+  .app-footer {
+    padding: 16px 0;
+    font-size: 11px;
+  }
+  .disclaimer {
+    font-size: 10px;
+  }
+
+  /* Sample targets wrap */
+  .sample-targets {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Scan progress compact */
+  .scan-progress-box {
+    padding: 16px;
+    margin: 0;
+  }
+  .progress-header {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .spinner {
+    width: 24px;
+    height: 24px;
+  }
+  .step-item {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  /* Error card */
+  .error-card {
+    padding: 16px;
+  }
+}

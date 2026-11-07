@@ -36,8 +36,8 @@ async def add_security_headers(request: Request, call_next):
 def startup_event():
     init_db()
 
-# Root endpoint to prevent 404 on base URL
-@app.get("/")
+# Root endpoint to prevent 404 on base URL and support HEAD health checks
+@app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
     return {"status": "online", "docs": "/docs"}
 
